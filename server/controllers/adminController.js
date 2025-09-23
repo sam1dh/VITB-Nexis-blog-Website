@@ -1,19 +1,21 @@
 import jwt from 'jsonwebtoken'
+import Blog from '../models/Blog.js';
+import Comment from '../models/Comment.js';
 
 export const adminLogin = async (req, res) => {
-    try {
-        const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-        if (email !== process.env.ADMIN_EMAIL || password !== process.env.
-            ADMIN_PASSWORD) {
-            return res.json({ success: false, message: "Invalid Credentials" })
-        }
-
-        const token = jwt.sign({ email }, process.env.JWT_SECRET)
-        res.json({ success: true, token })
-    } catch (error) {
-        res.json({ success: false, message: error.message })
+    if (email !== process.env.ADMIN_EMAIL || password !== process.env.
+      ADMIN_PASSWORD) {
+      return res.json({ success: false, message: "Invalid Credentials" })
     }
+
+    const token = jwt.sign({ email }, process.env.JWT_SECRET)
+    res.json({ success: true, token })
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
 }
 
 export const getAllBlogsAdmin = async (req, res) => {
@@ -40,14 +42,14 @@ export const getDashboard = async (req, res) => {
     const blogs = await Blog.countDocuments();
     const comments = await Comment.countDocuments();
     const drafts = await Blog.countDocuments({ isPublished: false });
-    
+
     const dashboardData = {
       blogs,
       comments,
       drafts,
       recentBlogs
     };
-    
+
     res.json({ success: true, dashboardData });
   } catch (error) {
     res.json({ success: false, message: error.message });

@@ -1,68 +1,108 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { assets, blogCategories } from '../../assets/assets'
+import { assets, blogCategories } from '../../Assets/assets'
 import Quill from 'quill';
-
+import { useAppContext } from '../../context/AppContext';
+import toast from 'react-hot-toast';
 const AddBlog = () => {
+
+  const { axios } = useAppContext()
+  const [isAdding, setIsAdding] = useState(false)
+
 
   const editorRef = useRef(null);
   const quillRef = useRef(null);
 
 
-  const [image,setImage] = useState(false);
-  const [title,setTitle] = useState('');
-  const [subTitle,setSubTitle] = useState('');
-  const [category,setCategory] = useState('startup');
-  const [isPublished,setIspublished] = useState(false);
+  const [image, setImage] = useState(false);
+  const [title, setTitle] = useState('');
+  const [subTitle, setSubTitle] = useState('');
+  const [category, setCategory] = useState('startup');
+  const [isPublished, setIspublished] = useState(false);
 
-  const generateContent = async()=>{
+  const generateContent = async () => {
 
   }
-  const onSubmitHandler = async(e)=>{
-    e.preventDefault();
-  }
-  useEffect(()=>{
-    // Initiate Quill only used
-    if(!quillRef.current && editorRef.current){
-      quillRef.current = new Quill(editorRef.current, {theme: 'snow'})
+
+  const onSubmitHandler = async (e) => {
+    try {
+      e.preventDefault();
+      setIsAdding(true)
+
+      const blog = {
+        title,
+        subTitle,
+        description: quillRef.current.root.innerHTML,
+        category,
+        isPublished
+      }
+
+      const formData = new FormData();
+      formData.append('blog', JSON.stringify(blog))
+      formData.append('image', image)
+
+      const { data } = await axios.post('/api/blog/add', formData);
+
+      if (data.success) {
+        toast.success(data.message);
+        setImage(false)
+        setTitle('')
+        quillRef.current.root.innerHTML = ''
+        setCategory('Startup')
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    } finally {
+      setIsAdding(false)
     }
-  })
+  }
 
-  return (
-   <form className='flex-1 bg-blue-50/50 text-gray-600 h-full overflow-scroll'>
-    <div className='bg-white w-full max-w-3x1 p-4 md:p-10 sm:m-10 shadow rounded'>
+    useEffect(() => {
+      // Initiate Quill only used
+      if (!quillRef.current && editorRef.current) {
+        quillRef.current = new Quill(editorRef.current, { theme: 'snow' })
+      }
+    })
+
+    return (
+      <form onSubmit={onSubmitHandler} className='flex-1 bg-blue-50/50 text-gray-600 h-full overflow-scroll'>
+        <div className='bg-white w-full max-w-3x1 p-4 md:p-10 sm:m-10 shadow rounded'>
           <p>Upload thumbnail</p>
           <label htmlFor="image">
-            <img src={!image ? assets.upload_area : URL.createObjectURL(image) } alt="" className='mt-2 h-16 rounded'/>
-            <input onChange={(e)=>setImage(e.target.files[0])} type="file" name="" id="image" hidden required/>
+            <img src={!image ? assets.upload_area : URL.createObjectURL(image)} alt="" className='mt-2 h-16 rounded' />
+            <input onChange={(e) => setImage(e.target.files[0])} type="file" name="" id="image" hidden required />
           </label>
           <p className='mt-4'>Blog title</p>
-          <input type="text" placeholder='Type here' required className='w-full max-w-lg mt-2 p-2 border border-gray-300 outline-none rounded' onChange={e=> setTitle(e.target.value)} value={title}/>
-                    <p className='mt-4'>Sub title</p>
-          <input type="text" placeholder='Type here' required className='w-full max-w-lg mt-2 p-2 border border-gray-300 outline-none rounded' onChange={e=> setSubTitle(e.target.value)} value={subTitle}/>
-            <p className='mt-4'>Blog Description</p>
-            <div className='max-w-lg h-74 pb-16 sm:pb-10 pt-2 relative'>
-              <div ref = {editorRef}>
+          <input type="text" placeholder='Type here' required className='w-full max-w-lg mt-2 p-2 border border-gray-300 outline-none rounded' onChange={e => setTitle(e.target.value)} value={title} />
+          <p className='mt-4'>Sub title</p>
+          <input type="text" placeholder='Type here' required className='w-full max-w-lg mt-2 p-2 border border-gray-300 outline-none rounded' onChange={e => setSubTitle(e.target.value)} value={subTitle} />
+          <p className='mt-4'>Blog Description</p>
+          <div className='max-w-lg h-74 pb-16 sm:pb-10 pt-2 relative'>
+            <div ref={editorRef}>
 
-              </div>
-              <button type='buttom' onClick={generateContent} className='absolute bottom-1 right-2 ml-2 text-xs text-white bg-black/70 px-4 py-1.5 rounded hover:underline cursor-pointer'>Generative with AI</button>
             </div>
+            <button type='buttom' onClick={generateContent} className='absolute bottom-1 right-2 ml-2 text-xs text-white bg-black/70 px-4 py-1.5 rounded hover:underline cursor-pointer'>Generative with AI</button>
+          </div>
 
-            <p className='mt-4'>Blog category</p>
-            <select onChange={e=>setCategory(e.target.value)} name="category " className='mt-2 px-3 py-2 border text-gray-500 border-gray-300 outline-none rounded'>
-              <option value="">Select Category</option>
-              {blogCategories.map((item,index)=>{
-                return <option key={index} value={item}>{item}</option>
-              })}
-            </select>
+          <p className='mt-4'>Blog category</p>
+          <select onChange={e => setCategory(e.target.value)} name="category " className='mt-2 px-3 py-2 border text-gray-500 border-gray-300 outline-none rounded'>
+            <option value="">Select Category</option>
+            {blogCategories.map((item, index) => {
+              return <option key={index} value={item}>{item}</option>
+            })}
+          </select>
 
-            <div>
-              <p>Publish Now</p>
-              <input type="checkbox" checked={isPublished} className='scale-125 cursor-pointer' onchange={e=>setIspublished(e.target.checked)}/>
-            </div>
-            <button type="submit" className='mt-8 w-40 h-10 bg-primary text-white rounded cursor-pointer text-sm'> Add Blog</button>
-    </div>
-   </form>
-  )
-}
+          <div>
+            <p>Publish Now</p>
+            <input type="checkbox" checked={isPublished} className='scale-125 cursor-pointer' onChange={e => setIspublished(e.target.checked)} />
+          </div>
+          <button disabled={isAdding} type="submit" className='mt-8 w-40 h-10 bg-primary text-white rounded cursor-pointer text-sm'>
+            {isAdding ? 'Adding...' : 'Add Blog'}
+          </button>
+        </div>
+      </form>
+    )
+  }
 
-export default AddBlog
+  export default AddBlog
