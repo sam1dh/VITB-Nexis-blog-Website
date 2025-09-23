@@ -3,12 +3,19 @@ import { useParams, Link } from 'react-router-dom';
 import Navbar from '../Components/Navbar';
 import { assets, blog_data, comments_data } from '../Assets/assets';
 import moment from 'moment';
+import { useAppContext } from '../context/AppContext';
+import toast from 'react-hot-toast';
 
 const Blog = () => {
   const { id } = useParams();
-  const [data, setDate] = useState(null);
+
+  const {axios} = useAppContext();
+
+  const [data, setData] = useState(null);
   const [comments, setComments] = useState(null);
   const [recommendedArticles, setRecommendedArticles] = useState([]);
+  const [name, setName] = useState('');
+  const [content, setContent] = useState('');
 
   // TF-IDF Implementation
   const calculateTFIDF = (documents) => {
@@ -134,14 +141,27 @@ const Blog = () => {
     return similarities;
   };
 
-  const fetchblogData = async () => {
-    const data = blog_data.find(item => item._id === id);
-    setDate(data);
-  };
+  const fetchBlogData = async () => {
+    try {
+        const { data } = await axios.get(`/api/blog/${id}`)
+        data.success ? setData(data.blog) : toast.error(data.message)
+    } catch (error) {
+        toast.error(error.message)
+    }
+};
 
   const fetchComments = async () => {
-    setComments(comments_data);
-  };
+    try {
+        const { data } = await axios.post('/api/blog/comments', { blogId: id })
+        if (data.success) {
+            setComments(data.comments)
+        } else {
+            toast.error(data.message);
+        }
+    } catch (error) {
+        toast.error(error.message);
+    }
+};
 
   const fetchRecommendations = () => {
     const recommendations = getRecommendations(id, 3);
@@ -150,10 +170,22 @@ const Blog = () => {
 
   const addComment = async (e) => {
     e.preventDefault();
-  };
+    try {
+        const { data } = await axios.post('/api/blog/add-comment', { blog: id, name, content });
+        if (data.success) {
+            toast.success(data.message)
+            setName('')
+            setContent('')
+        } else {
+            toast.error(data.message);
+        }
+    } catch (error) {
+        toast.error(error.message);
+    }
+};
 
   useEffect(() => {
-    fetchblogData();
+    fetchBlogData();
     fetchComments();
     fetchRecommendations();
   }, [id]);
@@ -308,6 +340,7 @@ const Blog = () => {
                 <label className='block text-sm font-medium text-gray-700'>Your Name</label>
                 <input 
                   type="text" 
+                  onChange={(e)=>setName(e.target.value)}
                   placeholder="Enter your full name" 
                   required 
                   className='w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors outline-none bg-white'
@@ -326,6 +359,7 @@ const Blog = () => {
             <div className='space-y-2'>
               <label className='block text-sm font-medium text-gray-700'>Your Comment</label>
               <textarea 
+                onChange={(e)=>(setContent(e.target.value))}
                 placeholder="Share your thoughts, feedback, or questions about this article..." 
                 className='w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors outline-none bg-white resize-none' 
                 rows="5"

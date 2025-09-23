@@ -1,32 +1,57 @@
-import React from 'react'
+import React, { useRef} from 'react'
 import { assets } from '../Assets/assets'
+import { useAppContext } from '../context/AppContext'
 
 const header = () => {
+
+  const { setInput, input } = useAppContext()
+  const inputRef = useRef()
+
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    setInput(inputRef.current.value)
+  }
+
+  const onClear = () => {
+    setInput('')
+    inputRef.current.value = ""
+  }
+
   return (
     <div className='mx-8 sm:mx-16 xl:mx-24 relative overflow-hidden'>
-        <div className='text-center mt-20 mb-8 animate-fade-in'>
-            <div className='inline-flex items-center justify-center gap-4 px-6 py-1.5 border border-primary/40 bg-primary/5 rounded-full text-primary text-sm mb-4 transform hover:scale-105 transition-all duration-300 hover:shadow-lg hover:bg-primary/10 animate-bounce-gentle backdrop-blur-sm'>
-            <p className='font-medium'>Vit Bhopal : A chance to grow </p>
-            <img src={assets.star_icon} className='w-2.5 animate-spin-slow hover:animate-pulse' alt="" />
-            </div>
-            <h1 className='text-3xl sm:text-6xl font-bold sm:leading-tight text-gray-800 animate-slide-up-delay bg-gradient-to-r from-gray-700 via-gray-800 to-gray-700 bg-clip-text text-transparent'>
-              Your <span className='text-primary bg-gradient-to-r from-primary to-purple-600 bg-clip-text animate-gradient-shift font-extrabold drop-shadow-sm'>College News</span><br/> 
-              & Magazine Hub
-            </h1>
-            <p className='my-6 sm:my-8 max-w-2xl mx-auto max-sm:text-xs text-gray-600 leading-relaxed animate-fade-in-up font-medium hover:text-gray-700 transition-colors duration-300'>
-              Discover the ultimate college news and magazine hub! Dive into fresh, engaging articles crafted for students. Join our vibrant platform to share stories that spark inspiration!
-            </p>
-          <form className='flex justify-between max-w-lg max-sm:scale-75 mx-auto border-2 border-gray-200/60 bg-white/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-primary/40 focus-within:border-primary/60 focus-within:bg-white/90 animate-search-appear'>
-            <input type="text" placeholder='Search for Blogs' required className='w-full pl-6 pr-4 py-4 outline-none bg-transparent text-gray-700 placeholder-gray-400 font-medium text-sm focus:placeholder-gray-300 transition-all duration-200' />
-            <button type='submit' className='bg-gradient-to-r from-primary to-primary px-8 text-white py-2 m-2 rounded-xl hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer font-semibold text-sm active:scale-95 hover:from-primary hover:to-primary'>Search</button>
-          </form>
+      <div className='text-center mt-20 mb-8 animate-fade-in'>
+        <div className='inline-flex items-center justify-center gap-4 px-6 py-1.5 border border-primary/40 bg-primary/5 rounded-full text-primary text-sm mb-4 transform hover:scale-105 transition-all duration-300 hover:shadow-lg hover:bg-primary/10 animate-bounce-gentle backdrop-blur-sm'>
+          <p className='font-medium'>Vit Bhopal : A chance to grow </p>
+          <img src={assets.star_icon} className='w-2.5 animate-spin-slow hover:animate-pulse' alt="" />
         </div>
-        <img 
-          src={assets.gradientBackground} 
-          alt="" 
-          className='absolute -top-50 -z-10 opacity-30 animate-float hover:opacity-40 transition-opacity duration-700 filter blur-sm hover:blur-none' 
-        />
-        <style jsx>{`
+
+        <h1 className='text-3xl sm:text-6xl font-bold sm:leading-tight text-gray-800 animate-slide-up-delay bg-gradient-to-r from-gray-700 via-gray-800 to-gray-700 bg-clip-text text-transparent'>
+          Your <span className='text-primary bg-gradient-to-r from-primary to-purple-600 bg-clip-text animate-gradient-shift font-extrabold drop-shadow-sm'>College News</span><br />
+          & Magazine Hub
+        </h1>
+
+        <p className='my-6 sm:my-8 max-w-2xl mx-auto max-sm:text-xs text-gray-600 leading-relaxed animate-fade-in-up font-medium hover:text-gray-700 transition-colors duration-300'>
+          Discover the ultimate college news and magazine hub! Dive into fresh, engaging articles crafted for students. Join our vibrant platform to share stories that spark inspiration!
+        </p>
+
+        <form onSubmit={onSubmitHandler} className='flex justify-between max-w-lg max-sm:scale-75 mx-auto border-2 border-gray-200/60 bg-white/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-primary/40 focus-within:border-primary/60 focus-within:bg-white/90 animate-search-appear'>
+          <input ref={inputRef} type="text" placeholder='Search for Blogs' required className='w-full pl-6 pr-4 py-4 outline-none bg-transparent text-gray-700 placeholder-gray-400 font-medium text-sm focus:placeholder-gray-300 transition-all duration-200' />
+          <button type='submit' className='bg-gradient-to-r from-primary to-primary px-8 text-white py-2 m-2 rounded-xl hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer font-semibold text-sm active:scale-95 hover:from-primary hover:to-primary'>Search</button>
+        </form>
+
+      </div>
+
+      <div className='text-center'>
+        {
+        input && <button onClick={onClear} className='border font-light text-xs py-1 px-3 rounded-sm shadow-custom-sm cursor-pointer'>Clear Search</button>
+        }
+      </div>
+      <img
+        src={assets.gradientBackground}
+        alt=""
+        className='absolute -top-50 -z-10 opacity-30 animate-float hover:opacity-40 transition-opacity duration-700 filter blur-sm hover:blur-none'
+      />
+      <style jsx>{`
           @keyframes search-appear {
             from { opacity: 0; transform: translateY(20px) scale(0.95); }
             to { opacity: 1; transform: translateY(0) scale(1); }
@@ -100,7 +125,7 @@ const header = () => {
             animation: gradient-shift 3s ease infinite;
           }
         `}
-        </style>
+      </style>
     </div>
   )
 }

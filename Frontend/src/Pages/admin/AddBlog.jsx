@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { assets, blogCategories } from '../../assets/assets'
 import Quill from 'quill';
+
 const AddBlog = () => {
 
   const editorRef = useRef(null);
