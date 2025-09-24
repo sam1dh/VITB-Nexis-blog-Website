@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '../Components/Navbar';
-import { assets, blog_data, comments_data } from '../Assets/assets';
+import { assets } from '../Assets/assets';
 import moment from 'moment';
 import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 const Blog = () => {
   const { id } = useParams();
 
-  const {axios} = useAppContext();
+  const {axios, blogs} = useAppContext();
 
   const [data, setData] = useState(null);
   const [comments, setComments] = useState(null);
@@ -120,9 +120,10 @@ const Blog = () => {
 
   // Get recommendations based on TF-IDF and Cosine Similarity
   const getRecommendations = (currentArticleId, numRecommendations = 3) => {
-    if (!blog_data || blog_data.length < 2) return [];
+    if (!blogs || blogs.length < 2) return [];
+    
 
-    const { tfidfVectors, vocabulary } = calculateTFIDF(blog_data);
+    const { tfidfVectors, vocabulary } = calculateTFIDF(blogs);
     
     // Find current article vector
     const currentArticle = tfidfVectors.find(article => article._id === currentArticleId);
@@ -187,8 +188,13 @@ const Blog = () => {
   useEffect(() => {
     fetchBlogData();
     fetchComments();
-    fetchRecommendations();
   }, [id]);
+
+  useEffect(() => {
+    if (blogs && blogs.length > 1 && id) {
+      fetchRecommendations();
+    }
+  }, [blogs, id]);
 
   return data ? (
     <div className='relative'>
