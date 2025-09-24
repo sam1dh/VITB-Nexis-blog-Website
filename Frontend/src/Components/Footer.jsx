@@ -7,7 +7,7 @@ const Footer = () => {
         {/* You can add footer links, logo, or social icons here later */}
       </div>
       <p className="py-4 text-center text-sm md:text-base text-gray-500/80">
-        Copyright © 2025 QuickB10g GreatStack - All Rights Reserved.
+        Copyright © 2025 VITB-NEXIS - All Rights Reserved.
       </p>
     </div>
   );
